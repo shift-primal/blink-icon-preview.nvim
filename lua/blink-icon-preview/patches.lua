@@ -22,6 +22,11 @@ local applied = false
 ---    20x20) next to a large viewBox (e.g. 256); ImageMagick rasterizes at
 ---    the explicit size and then upscales, producing pixelated output.
 ---    Stripping width/height makes it render at the viewBox size.
+---  * background plate: some icon SVGs draw a backing `<rect>` (a rounded
+---    card behind the glyph) with no width/height. Per the SVG spec a rect
+---    with no explicit size defaults to 0x0 — it never renders — leaving
+---    just the (often black) glyph with no backing plate, invisible against
+---    a dark terminal background. Give any sizeless rect the full canvas.
 ---
 ---@param img snacks.image.match
 ---@param ctx snacks.image.ctx
@@ -38,6 +43,7 @@ local function data_img(img, ctx)
 	img.ext = ft:match("^image/([%w%-]+)") or "png"
 	if img.ext == "svg" then
 		img.content = img.content:gsub(' width="[^"]*"', ""):gsub(' height="[^"]*"', "")
+		img.content = img.content:gsub("<rect ", '<rect width="100%%" height="100%%" ')
 	end
 end
 
